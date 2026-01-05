@@ -5,11 +5,17 @@ import { fetchInitialPrices, simulateTick } from "../utils/StockDataService";
 import {
     AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine, CartesianGrid
 } from "recharts";
+import StockQuiz from "../components/StockQuiz";
 
 // ---------- Stock Market Game (Real-Time Hybrid) ----------
 // ---------- Stock Market Game (Real-Time Hybrid) ----------
 export default function StockMarketGame() {
-    const { user, transact } = useContext(UserContext);
+    const { user, transact, trackDailyAction, grantTradingLicense } = useContext(UserContext);
+
+    // Auto-mark "Review Portfolio" habit on visit
+    useEffect(() => {
+        trackDailyAction('reviewPortfolio');
+    }, []);
 
     // Stocks State
     const [stocks, setStocks] = useState([]);
@@ -125,6 +131,28 @@ export default function StockMarketGame() {
     const chartColor = isPositive ? "#10B981" : "#EF4444"; // Emerald vs Red
 
     if (loading) return <div className="p-10 text-center text-brand-primary animate-pulse">Connecting to Exchange...</div>;
+
+    // Show Quiz if no license
+    if (!user.tradingLicense) {
+        return (
+            <div className="h-[calc(100vh-140px)] flex flex-col max-w-7xl mx-auto font-body relative">
+                <StockQuiz onComplete={grantTradingLicense} />
+                {/* Render blurred background of the app behind? Or just the quiz? 
+                     Let's just render the Quiz as a blocking modal over a blurred placeholder or just the quiz itself.
+                     StockQuiz is absolute positioned full screen, so we need a container.
+                 */}
+                <div className="flex justify-between items-center mb-6 blur-sm select-none pointer-events-none">
+                    {/* Placeholder Header for visual context */}
+                    <div>
+                        <h2 className="text-3xl font-heading font-bold text-white flex items-center gap-2">
+                            Market Terminal <span className="text-xs bg-slate-700 text-slate-400 px-2 py-0.5 rounded">LOCKED</span>
+                        </h2>
+                    </div>
+                </div>
+                <div className="flex-1 bg-black/20 rounded-xl border border-white/5 blur-sm"></div>
+            </div>
+        )
+    }
 
     return (
         <div className="h-[calc(100vh-140px)] flex flex-col max-w-7xl mx-auto font-body">

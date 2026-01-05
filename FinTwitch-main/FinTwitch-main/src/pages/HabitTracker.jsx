@@ -7,52 +7,48 @@ export default function HabitTracker() {
     const { user, updateHabitStats } = useContext(UserContext);
     const today = new Date().toISOString().split("T")[0];
 
-    const [tasks, setTasks] = useState([
-        { id: 1, text: "Read 1 Article", done: false },
-        { id: 2, text: "Complete Career Level", done: false },
-        { id: 3, text: "Review Portfolio", done: false },
-    ]);
+    // Automating tasks from UserContext
+    // If usage data is missing (legacy), default to empty
+    const daily = user.dailyActions?.date === today ? user.dailyActions : { readArticle: false, careerLevel: false, reviewPortfolio: false };
 
-    // ... (Streak logic unchanged) ...
-    const [streak, setStreak] = useState(() => {
-        const saved = JSON.parse(localStorage.getItem("fintwitch_streak")) || { current: 0, best: 0, lastDate: null, history: [] };
-        return saved;
-    });
+    const tasks = [
+        { id: 'readArticle', text: "Read 1 Article", done: daily.readArticle },
+        { id: 'careerLevel', text: "Complete Career Level", done: daily.careerLevel },
+        { id: 'reviewPortfolio', text: "Review Portfolio", done: daily.reviewPortfolio },
+    ];
+
+    // Streak is now managed in Context, we just read it.
+    // We can keep `streak` variable for compatibility if used below.
+    const streak = { current: user.streak || 0 };
+
     const [selfAssessment, setSelfAssessment] = useState(() => {
         return user?.habitStats || { savings: { score: 1, note: "" }, spending: { score: 1, note: "" }, investing: { score: 1, note: "" } };
     });
 
-    const toggleTask = (id) => {
-        const updated = tasks.map((t) => t.id === id ? { ...t, done: !t.done } : t);
-        setTasks(updated);
-    };
+    // No toggleTask needed (Automated)
     const getYesterday = () => {
         const d = new Date(); d.setDate(d.getDate() - 1); return d.toISOString().split("T")[0];
     };
 
-    useEffect(() => {
-        const allDone = tasks.every((t) => t.done);
-        if (allDone && streak.lastDate !== today) {
-            const newCurrent = streak.lastDate === getYesterday() ? streak.current + 1 : 1;
-            const newBest = Math.max(newCurrent, streak.best);
-            const updated = { current: newCurrent, best: newBest, lastDate: today, history: [...streak.history, today] };
-            setStreak(updated);
-            localStorage.setItem("fintwitch_streak", JSON.stringify(updated));
-        }
-    }, [tasks]);
+    // No useEffect for streak calculation needed here anymore.
 
     const handleReset = () => {
-        if (window.confirm("Reset habits?")) {
-            localStorage.removeItem("fintwitch_streak");
-            setStreak({ current: 0, best: 0, lastDate: null, history: [] });
-            setTasks((t) => t.map((task) => ({ ...task, done: false })));
+        if (window.confirm("Reset habits? (Dev Only)")) {
+            // No-op for now as state is in Context
+            // localStorage.removeItem("fintwitch_streak");
+            // setStreak({ current: 0, best: 0, lastDate: null, history: [] });
+            // setTasks((t) => t.map((task) => ({ ...task, done: false })));
         }
     };
 
+    // Simplified Heatmap - Just show current day for now as history migration is tricky
+    // Or we keep it static.
     const last30 = [...Array(30)].map((_, i) => {
         const d = new Date(); d.setDate(d.getDate() - (29 - i));
         const dateStr = d.toISOString().split("T")[0];
-        const active = streak.history.includes(dateStr);
+        // Check local state or user context logic if we added history. 
+        // For now, let's just highlight today if streak is active.
+        const active = user.lastStreakCompletion === dateStr;
         return { dateStr, active };
     });
 
@@ -82,19 +78,19 @@ export default function HabitTracker() {
                     <h3 className="text-lg font-bold text-white mb-4">Today's Focus</h3>
                     <div className="space-y-3">
                         {tasks.map((t) => (
-                            <button
+                            <div
                                 key={t.id}
-                                onClick={() => toggleTask(t.id)}
                                 className={`w-full flex items-center p-3 rounded-xl border transition-all ${t.done
-                                        ? "bg-brand-success/10 border-brand-success/30 text-brand-success"
-                                        : "bg-brand-surface border-slate-700 text-slate-300 hover:border-brand-primary/50"
+                                    ? "bg-brand-success/10 border-brand-success/30 text-brand-success"
+                                    : "bg-brand-surface border-slate-700 text-slate-300"
                                     }`}
                             >
                                 <div className={`w-5 h-5 rounded-md border mr-3 flex items-center justify-center ${t.done ? "bg-brand-success border-brand-success" : "border-slate-500"}`}>
                                     {t.done && <span className="text-black text-xs">✓</span>}
                                 </div>
                                 <span className={t.done ? "line-through opacity-70" : ""}>{t.text}</span>
-                            </button>
+                                {!t.done && <span className="ml-auto text-[10px] text-slate-500 bg-brand-dark px-2 py-1 rounded">Auto</span>}
+                            </div>
                         ))}
                     </div>
                 </div>
@@ -115,8 +111,8 @@ export default function HabitTracker() {
                                 key={i}
                                 title={d.dateStr}
                                 className={`w-full aspect-square rounded-sm transition-all ${d.active
-                                        ? "bg-brand-accent shadow-[0_0_8px_rgba(245,158,11,0.5)]"
-                                        : "bg-brand-dark border border-slate-800"
+                                    ? "bg-brand-accent shadow-[0_0_8px_rgba(245,158,11,0.5)]"
+                                    : "bg-brand-dark border border-slate-800"
                                     }`}
                             ></div>
                         ))}
@@ -143,8 +139,8 @@ export default function HabitTracker() {
                                             key={star}
                                             onClick={() => handleSelfChange(domain, "score", star)}
                                             className={`w-6 h-6 rounded flex items-center justify-center text-xs font-bold transition ${(selfAssessment[domain]?.score || 0) >= star
-                                                    ? "bg-brand-primary text-white"
-                                                    : "bg-brand-surface text-slate-600"
+                                                ? "bg-brand-primary text-white"
+                                                : "bg-brand-surface text-slate-600"
                                                 }`}
                                         >
                                             {star}

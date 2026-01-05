@@ -83,7 +83,7 @@ export default function ArticlesArea() {
         },
     ];
 
-    const { markArticleRead } = useContext(UserContext);
+    const { markArticleRead, trackDailyAction } = useContext(UserContext);
     const { push } = useContext(ToastContext);
 
     const [policyNews, setPolicyNews] = useState([]);
@@ -171,6 +171,7 @@ export default function ArticlesArea() {
 
                                 <button
                                     onClick={() => {
+                                        if (a.id !== open) trackDailyAction('readArticle');
                                         setOpen(a.id === open ? null : a.id);
                                         setShowQuiz(false);
                                     }}
