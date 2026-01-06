@@ -5,6 +5,7 @@ import { UserContext } from "../context/UserContext";
 import { CAREER_LEVELS } from "../data/careerLevels";
 import { fmt } from "../utils/format";
 import { TrendingUp, Gamepad2, Award, Lock, BookOpen, Calculator, Flame, PieChart, Home, ArrowUpCircle, Shield, Gem } from "lucide-react";
+import FinancialChatbot from "../components/FinancialChatbot";
 
 export default function GamesArea() {
     const { user } = useContext(UserContext);
@@ -80,7 +81,7 @@ export default function GamesArea() {
                 <div>
                     <div className="flex items-center gap-3 mb-6">
                         <Calculator className="text-brand-accent" />
-                        <h3 className="text-xl font-bold text-white">Your Toolkit</h3>
+                        <h3 className="text-xl font-bold text-white">YourToolkit</h3>
                     </div>
 
                     {user?.unlockedTools?.length > 0 ? (
@@ -124,6 +125,9 @@ export default function GamesArea() {
                 </div>
 
             </div>
+
+            {/* Financial Chatbot Integration */}
+            <FinancialChatbot />
         </div>
     );
 }
