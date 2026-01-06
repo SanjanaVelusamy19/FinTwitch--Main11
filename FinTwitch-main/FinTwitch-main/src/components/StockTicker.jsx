@@ -27,7 +27,8 @@ export default function StockTicker() {
             <div className="absolute top-0 right-0 h-full w-24 bg-gradient-to-l from-black to-transparent z-10"></div>
 
             <div
-                className="flex whitespace-nowrap gap-12 pl-4 animate-marquee"
+                className="flex whitespace-nowrap gap-12 pl-4 animate-marquee hover:pause-animation"
+                style={{ animationDuration: '60s' }} // Slowed down from default (usually 20-30s)
             >
                 {prices.map((item, i) => (
                     <div key={`${item.symbol}-${i}`} className="flex items-center gap-3 text-sm font-mono min-w-max">
@@ -39,6 +40,11 @@ export default function StockTicker() {
                     </div>
                 ))}
             </div>
+            <style jsx>{`
+                .hover\\:pause-animation:hover {
+                    animation-play-state: paused;
+                }
+            `}</style>
         </div>
     );
 }

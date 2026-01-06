@@ -17,11 +17,13 @@ import {
 export default function LeftNav() {
     const location = useLocation();
     const { user } = useUser();
+    const pathname = location.pathname;
 
     const allLinks = [
         { label: "Mission Control", to: "/", icon: Home, modes: ['career', 'financial_tools'] },
         { label: "Career Mode", to: "/games", icon: Gamepad2, modes: ['career'] },
-        { label: "Stock Market", to: "/games/stockmarket", icon: TrendingUp, modes: ['career', 'financial_tools'] },
+        // [UPDATED] Removed 'career' from Stock Market modes
+        { label: "Stock Market", to: "/games/stockmarket", icon: TrendingUp, modes: ['financial_tools'] },
         { label: "Dream Life", to: "/games/dreamlife", icon: Sparkles, modes: ['career', 'financial_tools'] },
         { label: "Tools Bay", to: "/tools", icon: Calculator, modes: ['career', 'financial_tools'] },
         { label: "Data Logs", to: "/articles", icon: BookOpen, modes: ['career', 'financial_tools'] },
@@ -46,10 +48,19 @@ export default function LeftNav() {
 
                 <ul className="space-y-3 px-3">
                     {links.map((link) => {
-                        const active =
-                            link.to === "/"
-                                ? location.pathname === "/"
-                                : location.pathname.startsWith(link.to);
+                        // Strict Active Logic
+                        let active = false;
+
+                        if (link.to === "/") {
+                            // Mission Control is active ONLY on exactly "/"
+                            active = pathname === "/";
+                        } else if (link.to === "/games") {
+                            // Career Mode is active ONLY on exactly "/games" (not stockmarket/dreamlife)
+                            active = pathname === "/games";
+                        } else {
+                            // Others match if they start with the path (e.g. /games/stockmarket)
+                            active = pathname.startsWith(link.to);
+                        }
 
                         const Icon = link.icon;
 
