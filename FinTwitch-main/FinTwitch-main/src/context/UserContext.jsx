@@ -60,6 +60,7 @@ export function UserProvider({ children }) {
     }, [user]);
 
     const isFetching = useRef(false);
+    const isSigningUp = useRef(false); // NEW: Lock to prevent race conditions during signup
 
     // Highly stable profile fetcher (Internal only) with Timeout
     const fetchProfile = async (uid, email) => {
@@ -113,7 +114,12 @@ export function UserProvider({ children }) {
         const unsubscribe = onAuthStateChanged(auth, (u) => {
             if (u) {
                 setFirebaseUser(u);
-                fetchProfile(u.uid, u.email);
+                // Only fetch profile if we are NOT currently in the middle of a manual signup
+                // This prevents the race condition where fetchProfile tries to create a doc 
+                // while signup is also trying to create it.
+                if (!isSigningUp.current) {
+                    fetchProfile(u.uid, u.email);
+                }
             } else {
                 setFirebaseUser(null);
                 setIsLoading(false);
@@ -131,7 +137,7 @@ export function UserProvider({ children }) {
     // Firestore Sync Hook (Defensive)
     useEffect(() => {
         const sync = async () => {
-            if (!firebaseUser || isLoading || isFetching.current) return;
+            if (!firebaseUser || isLoading || isFetching.current || isSigningUp.current) return;
             try {
                 const docRef = doc(db, "users", firebaseUser.uid);
                 await updateDoc(docRef, user).catch(async (err) => {
@@ -162,11 +168,25 @@ export function UserProvider({ children }) {
 
     const signup = async (email, password, username) => {
         setIsLoading(true);
+        isSigningUp.current = true; // Lock the listener
         try {
             const result = await createUserWithEmailAndPassword(auth, email, password);
+
+            // Manually initialize the user data since we blocked the listener
             const initialData = { ...INITIAL_USER_STATE, username, balance: 10000 };
             const docRef = doc(db, "users", result.user.uid);
-            await setDoc(docRef, initialData);
+
+            // Protected Firestore Write with Timeout
+            try {
+                const timeoutPromise = new Promise((_, reject) =>
+                    setTimeout(() => reject(new Error("Firestore write timeout")), 5000)
+                );
+                await Promise.race([setDoc(docRef, initialData), timeoutPromise]);
+            } catch (docRefError) {
+                console.warn("[UserContext] Firestore Init Failed (Offline?), continuing locally:", docRefError);
+                // We proceed anyway so the user isn't stuck
+            }
+
             setUser(initialData);
             setIsLoading(false);
             return true;
@@ -174,6 +194,10 @@ export function UserProvider({ children }) {
             push(error.message, { style: "danger" });
             setIsLoading(false);
             throw error;
+        } finally {
+            // Slight delay to ensure state propagates before releasing lock, 
+            // though synchronous execution should be fine.
+            setTimeout(() => { isSigningUp.current = false; }, 1000);
         }
     };
 

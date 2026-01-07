@@ -49,14 +49,14 @@ export default function Login() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-[#050505]">
+        <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-gradient-to-br from-[#020617] via-[#082f49] to-[#000000]">
             {/* Background blobs for aesthetics */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-600/20 blur-[100px] rounded-full pointer-events-none" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-cyan-600/20 blur-[100px] rounded-full pointer-events-none animate-pulse" />
 
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="w-full max-w-md p-8 rounded-2xl bg-[#050505]/80 backdrop-blur-xl border border-white/10 shadow-2xl relative z-10"
+                className="w-full max-w-md p-8 card-glass relative z-10"
             >
                 <div className="text-center mb-8">
                     <h2 className="text-3xl font-black text-white mb-2 font-heading tracking-tight">

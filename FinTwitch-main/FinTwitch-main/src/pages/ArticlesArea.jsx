@@ -1,102 +1,15 @@
-import React, { useState, useRef, useContext, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { UserContext } from "../context/UserContext";
 import { ToastContext } from "../context/ToastContext";
 import { fetchPolicyNews } from "../services/PolicyService";
 import { Newspaper, Bell, ExternalLink, ScrollText } from "lucide-react";
 
-// ---------- Articles (Premium Redesign) ----------
-function ArticleQuiz({ quiz, onComplete }) {
-    const [index, setIndex] = useState(0);
-    const [score, setScore] = useState(0);
-    const [selected, setSelected] = useState(null);
-    const [finished, setFinished] = useState(false);
-
-    const handleSubmit = () => {
-        if (selected === null) return;
-        if (selected === quiz[index].a) setScore((s) => s + 1);
-
-        if (index + 1 < quiz.length) {
-            setSelected(null);
-            setIndex(index + 1);
-        } else {
-            const finalScore = score + (selected === quiz[index].a ? 1 : 0);
-            setFinished(true);
-            onComplete(finalScore);
-        }
-    };
-
-    if (finished) return null;
-    const q = quiz[index];
-
-    return (
-        <div className="mt-6 border-t border-white/5 pt-4">
-            <div className="bg-[#0A0A0A] p-4 rounded-xl border border-blue-500/20">
-                <span className="text-[10px] text-blue-400 font-bold uppercase tracking-widest mb-2 block">Knowledge Check</span>
-                <p className="font-semibold text-white mb-4 text-sm">{q.q}</p>
-                <div className="space-y-2">
-                    {q.opts.map((opt, i) => (
-                        <button
-                            key={i}
-                            onClick={() => setSelected(i)}
-                            className={`block w-full text-left px-4 py-2.5 rounded-lg border text-xs transition-all duration-200 ${selected === i
-                                ? "bg-blue-500/20 border-blue-500 text-white"
-                                : "bg-black/40 border-white/5 text-slate-400 hover:bg-white/5"
-                                }`}
-                        >
-                            {opt}
-                        </button>
-                    ))}
-                </div>
-                <button onClick={handleSubmit} className="btn-primary mt-4 w-full py-2 text-xs">
-                    Submit Answer
-                </button>
-            </div>
-        </div>
-    );
-}
-
 export default function ArticlesArea() {
-    const articles = [
-        {
-            id: "a1",
-            title: "The Power of Compounding 💫",
-            excerpt: "Learn how small investments grow big over time.",
-            content: `Compounding is like a growing snowball. When your returns start earning more returns, your money can grow much faster over long periods.\nStarting early and staying consistent give compounding maximum time to work for you.`,
-            quiz: [{ q: "What does compounding mean?", opts: ["Interest on interest", "Spending money", "No growth"], a: 0 }, { q: "Which grows faster over long term?", opts: ["Simple interest", "Compound interest"], a: 1 }, { q: "Key to compounding?", opts: ["Patience", "Luck"], a: 0 }],
-            reward: 50,
-        },
-        {
-            id: "a2",
-            title: "Smart Budgeting 💰",
-            excerpt: "Control your expenses to control your life.",
-            content: `Budgeting gives your money a clear plan. By tracking income and spending, you make conscious choices instead of guessing where money went.\nRules like 50-30-20 can help you balance needs, wants and savings.`,
-            quiz: [{ q: "What is the 50-30-20 rule?", opts: ["Budgeting rule", "Tax rule"], a: 0 }, { q: "Budgeting is mainly about:", opts: ["Restriction", "Direction"], a: 1 }, { q: "How much goes to savings in 50-30-20?", opts: ["10%", "20%"], a: 1 }],
-            reward: 40,
-        },
-        {
-            id: "a3",
-            title: "Emergency Fund Essentials 🚨",
-            excerpt: "Prepare for the unexpected with a solid safety net.",
-            content: `Emergencies like medical bills or job loss can arrive suddenly. An emergency fund protects you from financial shocks.\nKeeping 3–6 months of expenses in a liquid place is a strong safety net.`,
-            quiz: [{ q: "Ideal emergency fund size?", opts: ["1–2 months", "3–6 months"], a: 1 }, { q: "Emergency fund should be:", opts: ["Locked away", "Easily accessible"], a: 1 }, { q: "Main purpose?", opts: ["Shopping", "Handling shocks"], a: 1 }],
-            reward: 60,
-        },
-    ];
-
-    const { markArticleRead, trackDailyAction } = useContext(UserContext);
+    const { trackDailyAction } = useContext(UserContext);
     const { push } = useContext(ToastContext);
 
     const [policyNews, setPolicyNews] = useState([]);
     const [loadingNews, setLoadingNews] = useState(true);
-    const [open, setOpen] = useState(null);
-    const [showQuiz, setShowQuiz] = useState(false);
-
-    const [readHistory, setReadHistory] = useState(() => {
-        const saved = localStorage.getItem("fintwitch_read_history");
-        return saved ? JSON.parse(saved) : [];
-    });
-
-    const contentRef = useRef(null);
 
     // Fetch Policy News
     useEffect(() => {
@@ -109,23 +22,97 @@ export default function ArticlesArea() {
         loadNews();
     }, []);
 
-    const handleScroll = (e) => {
-        const { scrollTop, scrollHeight, clientHeight } = e.target;
-        if (scrollTop + clientHeight >= scrollHeight - 30) setShowQuiz(true);
-    };
-
-    const handleQuizComplete = (score, article) => {
-        if (score >= 2) {
-            markArticleRead(article.id, article.reward);
-            const newRecord = { id: article.id, title: article.title, date: new Date().toLocaleString(), reward: article.reward };
-            const updated = [...readHistory.filter(h => h.id !== article.id), newRecord];
-            setReadHistory(updated);
-            localStorage.setItem("fintwitch_read_history", JSON.stringify(updated));
-            push(`🎉 You earned ₹${article.reward}! Score: ${score}/${article.quiz.length}`, { style: "success" });
-        } else {
-            push(`You scored ${score}/${article.quiz.length}. Try again next time!`, { style: "danger" });
+    const resourceLibrary = [
+        {
+            level: 1,
+            title: "Basics of Money",
+            resources: [
+                {
+                    source: "Investopedia",
+                    title: "8 Financial Basics for Young Adults",
+                    url: "https://www.investopedia.com/articles/younginvestors/08/eight-steps-to-financial-success.asp",
+                    summary: "Master the fundamental steps to financial success, from budgeting effectively to understanding credit scores and debt."
+                }
+            ]
+        },
+        {
+            level: 2,
+            title: "Saving Habits",
+            resources: [
+                {
+                    source: "Investopedia",
+                    title: "Guide to Saving Money",
+                    url: "https://www.investopedia.com/saving-money-4689743",
+                    summary: "A comprehensive guide on strategies to save money, where to keep your savings, and how to reach your financial potential."
+                },
+                {
+                    source: "Practical Money Skills",
+                    title: "Practical Money Skills Hub",
+                    url: "https://www.practicalmoneyskills.com",
+                    summary: "Interactive tools, games, and calculators designed to help you practice and improve your daily budgeting and saving habits."
+                }
+            ]
+        },
+        {
+            level: 3,
+            title: "Debt & Loans",
+            resources: [
+                {
+                    source: "Consumer Finance",
+                    title: "Debt Collection & Tools",
+                    url: "https://www.consumerfinance.gov/consumer-tools/debt-collection/",
+                    summary: "Official government resources to help you understand your rights, manage debt, and deal with debt collectors safely."
+                },
+                {
+                    source: "Money Under 30",
+                    title: "Debt Payoff Strategies",
+                    url: "https://moneyunder30.com",
+                    summary: "Targeted advice for young adults on how to manage student loans, credit card debt, and build a debt-free future."
+                }
+            ]
+        },
+        {
+            level: 4,
+            title: "Investing Foundations",
+            resources: [
+                {
+                    source: "Indeed",
+                    title: "Setting Financial Career Goals",
+                    url: "https://www.indeed.com/career-advice/career-development/finance-goals",
+                    summary: "Learn how to align your career growth with financial investing goals to maximize your long-term wealth building."
+                },
+                {
+                    source: "NGPF",
+                    title: "Investing Curriculum",
+                    url: "https://www.ngpf.org/curriculum/investing/",
+                    summary: "A structured curriculum explaining stock markets, index funds, and the power of compounding for beginners."
+                }
+            ]
+        },
+        {
+            level: 5,
+            title: "Financial Goal Planning",
+            resources: [
+                {
+                    source: "Smart About Money",
+                    title: "Smart About Money",
+                    url: "https://www.smartaboutmoney.org",
+                    summary: "Guidance on critical life events like buying a house, marriage, and retirement, ensuring your goals are financially backed."
+                },
+                {
+                    source: "FPA",
+                    title: "Find a Financial Planner",
+                    url: "https://www.plannersearch.org/financial-planning/",
+                    summary: "Understand the role of professional financial planning and how to find certified experts to help map your future."
+                }
+            ]
         }
-        setShowQuiz(false);
+    ];
+
+    const handleRead = (url) => {
+        trackDailyAction('readArticle');
+        window.open(url, '_blank');
+        push("+10 XP: Knowledge Acquired!", { style: "success" });
     };
 
     return (
@@ -133,101 +120,55 @@ export default function ArticlesArea() {
             <div className="flex flex-col md:flex-row md:items-end justify-between border-b border-white/5 pb-4">
                 <div>
                     <h2 className="text-4xl font-black text-white font-heading tracking-tight">
-                        Knowledge Hub
+                        Data Log
                     </h2>
-                    <p className="text-slate-400 mt-1">Acquire financial wisdom and stay ahead of the curve.</p>
+                    <p className="text-slate-400 mt-1">Curated resources to master every level of your financial journey.</p>
                 </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
-                {/* Left: Main Articles (8 Columns) */}
-                <div className="lg:col-span-8 space-y-6">
-                    <div className="flex items-center gap-3 mb-2">
-                        <ScrollText size={20} className="text-blue-500" />
-                        <h3 className="text-xl font-bold text-white uppercase tracking-wider text-sm">Deep Dive Articles</h3>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {articles.map((a) => (
-                            <div
-                                key={a.id}
-                                className={`card-glass p-6 flex flex-col justify-between group transition-all duration-300 ${open === a.id ? "ring-2 ring-blue-500/50 bg-blue-500/5" : ""}`}
-                            >
-                                <div>
-                                    <div className="flex justify-between items-start mb-4">
-                                        <span className="text-[10px] font-black text-emerald-400 bg-emerald-400/10 px-2 py-1 rounded uppercase tracking-widest">
-                                            +₹{a.reward} Reward
-                                        </span>
-                                    </div>
-
-                                    <h3 className="text-xl font-bold text-white mb-2 leading-tight group-hover:text-blue-400 transition-colors">
-                                        {a.title}
-                                    </h3>
-                                    <p className="text-xs text-slate-400 leading-relaxed mb-6">
-                                        {a.excerpt}
-                                    </p>
+                {/* Left: Resource Library (8 Columns) */}
+                <div className="lg:col-span-8 space-y-8">
+                    {resourceLibrary.map((section, idx) => (
+                        <div key={idx} className="space-y-4">
+                            <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center text-blue-400 font-bold">
+                                    {section.level}
                                 </div>
-
-                                <button
-                                    onClick={() => {
-                                        if (a.id !== open) trackDailyAction('readArticle');
-                                        setOpen(a.id === open ? null : a.id);
-                                        setShowQuiz(false);
-                                    }}
-                                    className={`w-full py-3 rounded-xl font-bold text-xs uppercase tracking-widest transition-all ${open === a.id
-                                        ? "bg-black/40 text-slate-400 border border-white/10"
-                                        : "bg-blue-600 text-white hover:bg-blue-500 shadow-lg shadow-blue-600/20"
-                                        }`}
-                                >
-                                    {open === a.id ? "Close" : "Read & Earn"}
-                                </button>
-
-                                {open === a.id && (
-                                    <div className="mt-6 pt-6 border-t border-white/5 animate-fadeIn">
-                                        <div
-                                            ref={contentRef}
-                                            onScroll={handleScroll}
-                                            className="p-4 bg-black/40 rounded-xl border border-white/5 text-slate-300 h-64 overflow-y-auto text-xs leading-relaxed space-y-4 custom-scrollbar"
-                                        >
-                                            {a.content.split("\n").map((line, i) => <p key={i}>{line}</p>)}
-
-                                            {!showQuiz && (
-                                                <div className="text-center pt-8 text-[10px] text-blue-400 font-bold animate-pulse uppercase tracking-widest">
-                                                    Scroll to bottom to start quiz ↓
-                                                </div>
-                                            )}
-
-                                            {showQuiz && (
-                                                <ArticleQuiz
-                                                    quiz={a.quiz}
-                                                    onComplete={(score) => handleQuizComplete(score, a)}
-                                                />
-                                            )}
-                                        </div>
-                                    </div>
-                                )}
+                                <h3 className="text-xl font-bold text-white uppercase tracking-wider">{section.title}</h3>
                             </div>
-                        ))}
-                    </div>
 
-                    {/* History */}
-                    {readHistory.length > 0 && (
-                        <div className="mt-12">
-                            <h3 className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-4">Reading History 🏅</h3>
-                            <div className="bg-[#0A0A0A] rounded-2xl border border-white/5 overflow-hidden">
-                                {readHistory.slice().reverse().map((h, idx) => (
-                                    <div key={idx} className="flex justify-between items-center p-4 border-b border-white/5 last:border-0 hover:bg-white/5 transition">
-                                        <div>
-                                            <p className="font-bold text-slate-200 text-sm">{h.title}</p>
-                                            <p className="text-[10px] text-slate-500">{h.date}</p>
+                            <div className="grid grid-cols-1 gap-4">
+                                {section.resources.map((res, rIdx) => (
+                                    <div
+                                        key={rIdx}
+                                        className="card-glass p-5 hover:bg-white/5 transition-all group flex flex-col md:flex-row gap-4 items-start md:items-center justify-between"
+                                    >
+                                        <div className="flex-1">
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <span className="text-[10px] font-bold text-blue-400 uppercase tracking-widest bg-blue-500/10 px-2 py-0.5 rounded">
+                                                    {res.source}
+                                                </span>
+                                            </div>
+                                            <h4 className="text-lg font-bold text-white mb-2 group-hover:text-blue-300 transition-colors">
+                                                {res.title}
+                                            </h4>
+                                            <p className="text-sm text-slate-400 leading-relaxed">
+                                                {res.summary}
+                                            </p>
                                         </div>
-                                        <span className="text-emerald-400 font-mono font-bold text-sm">+₹{h.reward}</span>
+                                        <button
+                                            onClick={() => handleRead(res.url)}
+                                            className="shrink-0 px-6 py-3 rounded-xl bg-white/5 border border-white/10 hover:bg-blue-600 hover:text-white hover:border-blue-500 font-bold text-xs uppercase tracking-widest transition-all flex items-center gap-2"
+                                        >
+                                            Read <ExternalLink size={14} />
+                                        </button>
                                     </div>
                                 ))}
                             </div>
                         </div>
-                    )}
+                    ))}
                 </div>
 
                 {/* Right: Schemes & Policies (4 Columns) */}

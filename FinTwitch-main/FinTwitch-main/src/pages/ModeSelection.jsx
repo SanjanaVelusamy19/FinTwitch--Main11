@@ -11,11 +11,11 @@ export default function ModeSelection() {
     };
 
     return (
-        <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden bg-[#050505] p-6">
+        <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden bg-gradient-to-br from-[#020617] via-[#082f49] to-[#000000] p-6">
             {/* Background Aesthetics */}
             <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-                <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-blue-600/10 blur-[120px] rounded-full mix-blend-screen" />
-                <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-purple-600/10 blur-[120px] rounded-full mix-blend-screen" />
+                <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-cyan-600/10 blur-[120px] rounded-full mix-blend-screen" />
+                <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-indigo-600/10 blur-[120px] rounded-full mix-blend-screen" />
             </div>
 
             <motion.div
@@ -23,7 +23,7 @@ export default function ModeSelection() {
                 animate={{ opacity: 1, y: 0 }}
                 className="text-center mb-16 relative z-10"
             >
-                <h1 className="text-4xl md:text-5xl font-black text-white mb-4 font-heading tracking-tight">
+                <h1 className="text-4xl md:text-5xl font-black text-white mb-4 font-heading tracking-tight text-glow-mega">
                     Choose Your Path
                 </h1>
                 <p className="text-slate-400 text-lg max-w-2xl mx-auto">
@@ -36,9 +36,9 @@ export default function ModeSelection() {
                 {/* Option 1: Corporate Career */}
                 <Link to="/games" className="group" onClick={() => selectMode('career')}>
                     <motion.div
-                        whileHover={{ scale: 1.02 }}
+                        whileHover={{ scale: 1.02, translateY: -5 }}
                         whileTap={{ scale: 0.98 }}
-                        className="h-full p-8 rounded-3xl bg-[#0A0A0A] border border-white/5 hover:border-blue-500/50 hover:bg-blue-500/5 transition-all duration-300 flex flex-col items-center text-center relative overflow-hidden"
+                        className="h-full p-8 card-glass hover:bg-cyan-900/10 transition-all duration-300 flex flex-col items-center text-center relative overflow-hidden"
                     >
                         <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-600 to-cyan-500 flex items-center justify-center mb-4 shadow-lg shadow-blue-500/20 group-hover:shadow-blue-500/40 transition-shadow">
                             <Briefcase size={32} className="text-white" />
@@ -55,9 +55,9 @@ export default function ModeSelection() {
                 {/* Option 2: Financial Mastery */}
                 <Link to="/tools" className="group" onClick={() => selectMode('financial_tools')}>
                     <motion.div
-                        whileHover={{ scale: 1.02 }}
+                        whileHover={{ scale: 1.02, translateY: -5 }}
                         whileTap={{ scale: 0.98 }}
-                        className="h-full p-8 rounded-3xl bg-[#0A0A0A] border border-white/5 hover:border-orange-500/50 hover:bg-orange-500/5 transition-all duration-300 flex flex-col items-center text-center relative overflow-hidden"
+                        className="h-full p-8 card-glass hover:bg-orange-900/10 transition-all duration-300 flex flex-col items-center text-center relative overflow-hidden"
                     >
                         <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-orange-600 to-amber-500 flex items-center justify-center mb-4 shadow-lg shadow-orange-500/20 group-hover:shadow-orange-500/40 transition-shadow">
                             <Calculator size={32} className="text-white" />

@@ -4,183 +4,187 @@ import { motion, AnimatePresence } from "framer-motion";
 import { UserContext } from "../context/UserContext";
 import { ToastContext } from "../context/ToastContext";
 
-// ---------- Dream Life Planner (Premium Redesign) ----------
+// Data
+import { LIFE_DREAMS, SCENARIOS } from "../data/lifeScenarios";
+
+// New Components
+import DreamMeter from "../components/DreamMeter";
+import TradeOffTable from "../components/TradeOffTable";
+import AlternatePath from "../components/AlternatePath";
+
 export default function DreamLifePlanner() {
-    const { user, transact } = useContext(UserContext);
+    const { user, transact, trackDailyAction } = useContext(UserContext);
     const { push } = useContext(ToastContext);
 
-    const [scene, setScene] = useState(() => {
-        const saved = localStorage.getItem("dreamlife_progress");
-        return saved ? JSON.parse(saved).scene : 1;
-    });
+    // --- State ---
+    const [sceneIndex, setSceneIndex] = useState(0);
+    const [dreamScores, setDreamScores] = useState({ swe: 10, startup: 10, fire: 10 });
+    const [hoveredChoice, setHoveredChoice] = useState(null);
+    const [choiceMade, setChoiceMade] = useState(null); // The choice object selected
+    const [showAlternate, setShowAlternate] = useState(false);
 
-    const [stats, setStats] = useState(() => {
-        const saved = localStorage.getItem("dreamlife_progress");
-        return saved
-            ? JSON.parse(saved).stats
-            : { happiness: 5, consistency: 5, wisdom: 5 };
-    });
+    // Initial Resume logic could go here (localStorage)
 
-    const [log, setLog] = useState([]);
+    // --- Auto-select Dreams (Prototype: All Selected) ---
+    // In full version, user would pick 2-3 at start.
+    const activeDreams = LIFE_DREAMS;
 
-    // ... (Logic unchanged) ...
-    const nextScene = (next = null) => setScene((s) => next || s + 1);
+    const currentScenario = SCENARIOS[sceneIndex];
 
-    useEffect(() => {
-        localStorage.setItem("dreamlife_progress", JSON.stringify({ scene, stats, log }));
-    }, [scene, stats, log]);
-
-    const handleChoice = (choice) => {
-        if (choice.cost && user.balance < choice.cost) {
+    const handleChoiceClick = (choice) => {
+        if (user.balance < choice.cost.money) {
             push("Insufficient funds!", { style: "danger" });
             return;
         }
-        if (choice.cost) transact(-choice.cost, { label: choice.label });
-        if (choice.income) transact(choice.income, { label: choice.label });
 
-        setStats((prev) => ({
-            happiness: Math.max(0, prev.happiness + (choice.happiness || 0)),
-            consistency: Math.max(0, prev.consistency + (choice.consistency || 0)),
-            wisdom: Math.max(0, prev.wisdom + (choice.wisdom || 0)),
-        }));
+        // Apply Costs
+        if (choice.cost.money > 0) transact(-choice.cost.money, { label: choice.label });
 
-        setLog((l) => [...l, choice.label]);
-        push(choice.feedback || "Choice recorded.");
-        setTimeout(() => nextScene(choice.next), 800);
+        // Update Dream Scores
+        setDreamScores(prev => {
+            const next = { ...prev };
+            Object.keys(choice.impact.alignment).forEach(key => {
+                next[key] = Math.max(0, Math.min(100, (next[key] || 0) + choice.impact.alignment[key]));
+            });
+            return next;
+        });
+
+        // Set state to "Result Mode"
+        setChoiceMade(choice);
+        trackDailyAction('lifeSimulation'); // Custom daily action
     };
 
-    const scenes = {
-        1: {
-            title: "Scene 1: The Morning Dilemma 🌅",
-            story: "It’s 8 AM. Your stomach growls as you rush to your first class. You check your wallet—money is tight.",
-            choices: [
-                { label: "Buy a good breakfast (₹50)", cost: 50, happiness: +2, feedback: "Yum! Energized for the day." },
-                { label: "Skip breakfast, save money", cost: 0, happiness: -2, feedback: "You saved cash but feel sluggish." },
-                { label: "Grab tea with friends (₹20)", cost: 20, happiness: +1, consistency: +1, feedback: "Socializing boosts morale! ☕" },
-            ],
-        },
-        2: {
-            title: "Scene 2: The College Event 🎤",
-            story: "There’s a big tech fest on campus. Everyone’s talking about it. You can buy tickets or volunteer.",
-            choices: [
-                { label: "Buy tickets (₹200)", cost: 200, happiness: +2, consistency: +1, feedback: "Great experience & fun!" },
-                { label: "Volunteer for free", cost: 0, consistency: +2, wisdom: +1, feedback: "Hard work but valuable networking." },
-                { label: "Skip the event", cost: 0, happiness: -1, feedback: "Saved money, but missed out." },
-            ],
-        },
-        3: {
-            title: "Scene 3: The Freelance Offer 💼",
-            story: "A senior offers you a quick freelance project worth ₹500. It’ll take your whole evening, though.",
-            choices: [
-                { label: "Accept the project", income: 500, consistency: -1, wisdom: +2, feedback: "Earned ₹500! Hustle pays off.", next: 4 },
-                { label: "Reject it and study", cost: 0, wisdom: +3, feedback: "Focused on academics. Good choice.", next: 4 },
-                { label: "Ignore the message", cost: 0, feedback: "Procrastination isn't great...", next: 4 },
-            ],
-        },
-        4: {
-            title: "Scene 4: Checkpoint 🧾",
-            story: "Your first week ends. Review your life stats.",
-            summary: true,
-        },
+    const handleNext = () => {
+        setChoiceMade(null);
+        setHoveredChoice(null);
+        setShowAlternate(false);
+        if (sceneIndex < SCENARIOS.length - 1) {
+            setSceneIndex(prev => prev + 1);
+        } else {
+            push("Demo complete! More scenarios coming soon.", { style: "success" });
+            // Should probably reset or show summary screen
+        }
     };
 
-    const sceneData = scenes[scene];
-    if (!sceneData) return <div className="p-10 text-center">Loading Scenario...</div>;
+    if (!currentScenario) return <div className="p-20 text-center">Journey Complete.</div>;
 
     return (
-        <div className="max-w-2xl mx-auto h-[calc(100vh-140px)] flex flex-col">
+        <div className="max-w-4xl mx-auto min-h-[calc(100vh-140px)] flex flex-col p-4 md:p-0">
+
+            {/* Header / Nav */}
             <div className="flex justify-between items-center mb-6">
                 <Link to="/games" className="text-xs text-slate-500 hover:text-white uppercase tracking-wider block">← Back to Games</Link>
-                <button onClick={() => { localStorage.removeItem("dreamlife_progress"); window.location.reload(); }} className="text-xs text-brand-danger hover:underline">
-                    Restart Chapter
-                </button>
+                <div className="text-xs text-slate-600 uppercase font-bold">Life Simulator v2.0</div>
             </div>
 
-            <AnimatePresence mode="wait">
-                <motion.div
-                    key={scene}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                    transition={{ duration: 0.4 }}
-                    className="flex-1 flex flex-col"
-                >
-                    <div className="card-glass p-8 flex-1 relative overflow-hidden">
-                        {/* Decorative Background */}
-                        <div className="absolute top-0 right-0 w-64 h-64 bg-brand-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1">
 
-                        <span className="text-xs font-bold text-brand-primary bg-brand-primary/10 px-2 py-1 rounded inline-block mb-4">ROLEPLAY</span>
-                        <h2 className="text-3xl font-bold text-white mb-4 leading-tight">
-                            {sceneData.title}
-                        </h2>
-                        <p className="text-lg text-slate-300 mb-8 leading-relaxed font-body border-l-2 border-brand-accent/50 pl-4">
-                            {sceneData.story}
-                        </p>
+                {/* LEFT: Dream Alignment Dashboard */}
+                <div className="lg:col-span-1 space-y-6">
+                    <div className="card-glass p-6">
+                        <h3 className="text-sm font-bold text-slate-400 uppercase mb-4 tracking-widest border-b border-white/10 pb-2">
+                            Life Vision Board
+                        </h3>
+                        <div className="space-y-6">
+                            {activeDreams.map(dream => (
+                                <DreamMeter
+                                    key={dream.id}
+                                    dream={dream}
+                                    score={dreamScores[dream.id]}
+                                />
+                            ))}
+                        </div>
+                    </div>
 
-                        {sceneData.summary ? (
-                            <div className="bg-brand-surface p-6 rounded-xl border border-white/5">
-                                <h3 className="text-lg font-bold text-white mb-4">Chapter Summary</h3>
-                                <div className="grid grid-cols-2 gap-4 mb-6">
-                                    <div className="p-3 bg-brand-dark rounded-lg">
-                                        <div className="text-xs text-slate-500 uppercase">Happiness</div>
-                                        <div className="text-xl font-bold text-brand-secondary">{stats.happiness}</div>
+                    {/* Trade-off Visualizer (Shows on Hover or Selection) */}
+                    <div className="relative">
+                        <TradeOffTable choice={hoveredChoice || choiceMade} />
+                    </div>
+                </div>
+
+                {/* RIGHT: Scenario Engine */}
+                <div className="lg:col-span-2 flex flex-col">
+                    <AnimatePresence mode="wait">
+                        <motion.div
+                            key={currentScenario.id}
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -20 }}
+                            className="card-glass p-8 flex-1 flex flex-col relative overflow-hidden"
+                        >
+                            {/* Ambient BG */}
+                            <div className="absolute -top-20 -right-20 w-80 h-80 bg-blue-600/10 blur-[100px] rounded-full pointer-events-none" />
+
+                            <div className="relative z-10 flex-1 flex flex-col">
+                                <span className="text-xs font-bold text-blue-400 mb-2 uppercase tracking-wider">
+                                    Scenario #{sceneIndex + 1}
+                                </span>
+                                <h2 className="text-3xl font-heading font-black text-white mb-4">
+                                    {currentScenario.title}
+                                </h2>
+                                <p className="text-lg text-slate-300 leading-relaxed mb-8 border-l-4 border-blue-500/50 pl-4 bg-blue-500/5 py-2 rounded-r-lg">
+                                    {currentScenario.description}
+                                </p>
+
+                                {/* Choices Area */}
+                                {!choiceMade ? (
+                                    <div className="space-y-3 mt-auto">
+                                        {currentScenario.choices.map((choice) => (
+                                            <button
+                                                key={choice.id}
+                                                onMouseEnter={() => setHoveredChoice(choice)}
+                                                onMouseLeave={() => setHoveredChoice(null)}
+                                                onClick={() => handleChoiceClick(choice)}
+                                                className="w-full text-left p-4 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-blue-500/50 transition-all group relative overflow-hidden"
+                                            >
+                                                <div className="flex justify-between items-center relative z-10">
+                                                    <div>
+                                                        <span className="font-bold text-slate-200 group-hover:text-white block text-lg">
+                                                            {choice.label}
+                                                        </span>
+                                                        <span className="text-xs text-slate-500 group-hover:text-blue-300 transition-colors">
+                                                            Cost: {choice.cost.money > 0 ? `₹${choice.cost.money}` : 'Free'} • {choice.cost.time}h Time
+                                                        </span>
+                                                    </div>
+                                                    <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-blue-500 group-hover:text-white transition-all">
+                                                        →
+                                                    </div>
+                                                </div>
+                                            </button>
+                                        ))}
                                     </div>
-                                    <div className="p-3 bg-brand-dark rounded-lg">
-                                        <div className="text-xs text-slate-500 uppercase">Consistency</div>
-                                        <div className="text-xl font-bold text-brand-accent">{stats.consistency}</div>
-                                    </div>
-                                    <div className="p-3 bg-brand-dark rounded-lg">
-                                        <div className="text-xs text-slate-500 uppercase">Wisdom</div>
-                                        <div className="text-xl font-bold text-brand-primary">{stats.wisdom}</div>
-                                    </div>
-                                    <div className="p-3 bg-brand-dark rounded-lg">
-                                        <div className="text-xs text-slate-500 uppercase">Net Balance</div>
-                                        <div className="text-xl font-bold text-brand-success">₹{user.balance}</div>
-                                    </div>
-                                </div>
-                                <button onClick={() => push("More chapters coming soon!")} className="btn-primary w-full">
-                                    Continue Journey
-                                </button>
-                            </div>
-                        ) : (
-                            <div className="space-y-3">
-                                {sceneData.choices.map((choice, idx) => (
-                                    <button
-                                        key={idx}
-                                        onClick={() => handleChoice(choice)}
-                                        className="w-full text-left p-4 rounded-xl border border-white/10 bg-brand-surface/50 hover:bg-brand-primary/10 hover:border-brand-primary/50 transition-all group"
+                                ) : (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        className="mt-auto bg-green-500/10 border border-green-500/30 p-6 rounded-xl"
                                     >
-                                        <div className="flex justify-between items-center">
-                                            <span className="font-semibold text-slate-200 group-hover:text-white transition-colors">{choice.label}</span>
-                                            <span className="text-slate-500 text-sm group-hover:text-brand-primary opacity-0 group-hover:opacity-100 transition-all">Select →</span>
-                                        </div>
-                                    </button>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                </motion.div>
-            </AnimatePresence>
+                                        <h3 className="text-xl font-bold text-green-400 mb-2">Decision Locked 🔒</h3>
+                                        <p className="text-white text-lg mb-1">{choiceMade.consequence}</p>
+                                        <p className="text-sm text-slate-400 mb-4">Your alignment scores have been updated.</p>
 
-            {/* Stats Footer */}
-            <div className="mt-6 grid grid-cols-3 gap-4 text-center">
-                <div>
-                    <div className="text-xs text-slate-500 uppercase tracking-wider">Happiness</div>
-                    <div className="h-1 bg-slate-800 rounded-full mt-1 overflow-hidden">
-                        <div className="h-full bg-brand-secondary transition-all" style={{ width: `${Math.min(100, stats.happiness * 10)}%` }}></div>
-                    </div>
-                </div>
-                <div>
-                    <div className="text-xs text-slate-500 uppercase tracking-wider">Consistency</div>
-                    <div className="h-1 bg-slate-800 rounded-full mt-1 overflow-hidden">
-                        <div className="h-full bg-brand-accent transition-all" style={{ width: `${Math.min(100, stats.consistency * 10)}%` }}></div>
-                    </div>
-                </div>
-                <div>
-                    <div className="text-xs text-slate-500 uppercase tracking-wider">Wisdom</div>
-                    <div className="h-1 bg-slate-800 rounded-full mt-1 overflow-hidden">
-                        <div className="h-full bg-brand-primary transition-all" style={{ width: `${Math.min(100, stats.wisdom * 10)}%` }}></div>
-                    </div>
+                                        <AlternatePath
+                                            alternateText={choiceMade.alternate}
+                                            onDismiss={handleNext}
+                                        />
+
+                                        {/* If alternate is NOT clicked/shown, we still need a way to go next. 
+                                            Actually AlternatePath handles "See" -> "Continue". 
+                                            But if user doesn't want to see? We need a main Continue button too?
+                                            The requirement said "After a choice... show CTA... On click display alternate".
+                                            My AlternatePath component toggles. 
+                                            Let's add a "Next" button here just in case they don't care about alternate.
+                                        */}
+                                        <div className="mt-4 flex justify-end">
+                                            <button onClick={handleNext} className="text-sm text-slate-500 hover:text-white underline">
+                                                Skip Reflection →
+                                            </button>
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </div>
+                        </motion.div>
+                    </AnimatePresence>
                 </div>
             </div>
         </div>
