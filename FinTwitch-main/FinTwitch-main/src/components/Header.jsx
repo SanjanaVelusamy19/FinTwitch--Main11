@@ -2,47 +2,65 @@ import React, { useState } from "react";
 import { useUser } from "../context/UserContext";
 import { useToast } from "../context/ToastContext";
 import AnimatedBalance from "./AnimatedBalance";
-import { Bell, Search, User, LogOut } from "lucide-react"; // Added Icons
+import { Search, User, LogOut } from "lucide-react"; // Added Icons
 import { Link, useNavigate } from "react-router-dom";
+import { findBestMatch } from "../data/searchIndex";
 
 // ---------- Header (Polished) ----------
 export default function Header() {
     const { user, login, logout } = useUser();
     const { push } = useToast();
     const navigate = useNavigate();
+    const [searchQuery, setSearchQuery] = useState("");
 
     const handleLogout = async () => {
         await logout();
         navigate("/");
     };
 
+    const handleSearch = (e) => {
+        if (e.key === 'Enter') {
+            const match = findBestMatch(searchQuery);
+
+            if (match) {
+                navigate(match.path);
+                push(`Navigating to ${match.title}`, "success");
+            } else {
+                push("No matching tool or game found. Try 'stock', 'career', or 'tools'.", "error");
+            }
+        }
+    };
+
     return (
         <header className="fixed top-0 left-0 w-full z-50 transition-all duration-300 bg-[#050505]/80 backdrop-blur-xl border-b border-white/5">
-            <div className="max-w-[1440px] mx-auto px-6 h-[80px] flex items-center justify-between">
+            <div className="max-w-[1440px] mx-auto px-6 h-[90px] flex items-center justify-between">
 
                 {/* Logo Area */}
                 <div className="flex items-center gap-12">
-                    <Link to="/" className="flex items-center gap-3 group cursor-pointer">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 shadow-lg shadow-blue-500/20 flex items-center justify-center text-white font-bold text-xl group-hover:rotate-12 transition-transform">
+                    <Link to="/" className="flex items-center gap-4 group cursor-pointer">
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 shadow-lg shadow-blue-500/20 flex items-center justify-center text-white font-bold text-2xl group-hover:rotate-12 transition-transform">
                             F
                         </div>
                         <div>
                             {/* Gamified Header text with Neon Pulse */}
-                            <h1 className="text-xl font-heading font-black text-white tracking-wide relative">
+                            <h1 className="text-4xl font-heading font-black text-white tracking-wide relative text-glow-mega">
                                 <span className="absolute -inset-1 blur-sm bg-cyan-500/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-pulse"></span>
-                                <span className="relative drop-shadow-[0_0_10px_rgba(6,182,212,0.8)]">FinTwitch</span>
+                                <span className="relative drop-shadow-[0_0_15px_rgba(6,182,212,0.9)]">FinTwitch</span>
                             </h1>
                             <span className="text-[10px] text-cyan-400 uppercase tracking-widest font-bold">City</span>
                         </div>
                     </Link>
 
-                    {/* Search Bar (Visual Only) */}
-                    <div className="hidden md:flex items-center gap-3 px-4 py-2 rounded-full bg-white/5 border border-white/5 hover:border-cyan-500/30 hover:bg-white/10 transition-all w-[300px] group/search">
-                        <Search size={16} className="text-slate-500 group-hover/search:text-cyan-400 transition-colors" />
+                    {/* Search Bar (Functional) */}
+                    <div className="hidden md:flex items-center gap-3 px-4 py-3 rounded-full bg-white/5 border border-white/5 hover:border-cyan-500/30 hover:bg-white/10 transition-all w-[350px] group/search">
+                        <Search size={18} className="text-slate-500 group-hover/search:text-cyan-400 transition-colors" />
                         <input
                             type="text"
-                            placeholder="Search stocks, tools..."
+                            placeholder="Type keyword & hit Enter (e.g. 'stock', 'tools')"
                             className="bg-transparent outline-none text-sm text-slate-200 w-full placeholder:text-slate-600"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            onKeyDown={handleSearch}
                         />
                     </div>
                 </div>
@@ -55,12 +73,7 @@ export default function Header() {
                         </Link>
                     ) : (
                         <>
-                            {/* Notifications */}
-                            <div className="relative cursor-pointer p-2 rounded-full hover:bg-white/5 transition-colors group/notif">
-                                <Bell size={20} className="text-slate-400 group-hover/notif:text-cyan-400 transition-colors group-hover/notif:rotate-12 transform origin-top" />
-                                <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-black animate-ping"></span>
-                                <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-black"></span>
-                            </div>
+                            {/* Notifications Removed as requested */}
 
                             {/* Balance Pill */}
                             <div className="hidden md:flex flex-col items-end mr-4">

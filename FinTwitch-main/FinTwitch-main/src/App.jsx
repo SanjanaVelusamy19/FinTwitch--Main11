@@ -1,10 +1,12 @@
 import React from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { UserProvider, useUser } from "./context/UserContext";
 import { ToastsProvider } from "./context/ToastContext";
+import { AnimatePresence, motion } from "framer-motion";
 
 // Components
 import Shell from "./components/Shell";
+import ClickSpark from "./components/ClickSpark";
 
 // Pages
 import HomePage from "./pages/HomePage";
@@ -38,42 +40,60 @@ function ProtectedRoute({ children }) {
   return children;
 }
 
+// Wrapper for page transitions
+const PageWrapper = ({ children }) => (
+  <motion.div
+    initial={{ opacity: 0, scale: 0.95, y: 10 }}
+    animate={{ opacity: 1, scale: 1, y: 0 }}
+    exit={{ opacity: 0, scale: 1.05 }}
+    transition={{ duration: 0.3, ease: "easeOut" }}
+    className="w-full h-full"
+  >
+    {children}
+  </motion.div>
+);
+
 export default function App() {
+  const location = useLocation();
+
   return (
     <ToastsProvider>
       <UserProvider>
-        <Routes>
-          <Route path="/login" element={<Login />} />
+        <ClickSpark />
+        <AnimatePresence mode="wait">
+          <Routes location={location} key={location.pathname}>
+            <Route path="/login" element={<PageWrapper><Login /></PageWrapper>} />
 
-          {/* Protected Routes */}
-          <Route
-            path="/mode-selection"
-            element={
-              <ProtectedRoute>
-                <ModeSelection />
-              </ProtectedRoute>
-            }
-          />
+            {/* Protected Routes */}
+            <Route
+              path="/mode-selection"
+              element={
+                <ProtectedRoute>
+                  <PageWrapper><ModeSelection /></PageWrapper>
+                </ProtectedRoute>
+              }
+            />
 
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <Shell />
-              </ProtectedRoute>
-            }
-          >
-            <Route index element={<Navigate to="/mode-selection" replace />} />
-            <Route path="games" element={<GamesArea />} />
-            <Route path="games/career/:levelId" element={<CareerLevelPage />} />
-            <Route path="games/dreamlife" element={<DreamLifePlanner />} />
-            <Route path="games/stockmarket" element={<StockMarketGame />} />
-            <Route path="tools" element={<ToolsArea />} />
-            <Route path="articles" element={<ArticlesArea />} />
-            <Route path="habit" element={<HabitTracker />} />
-            <Route path="transactions" element={<TransactionsArea />} />
-          </Route>
-        </Routes>
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <Shell />
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<Navigate to="/mode-selection" replace />} />
+              <Route path="games" element={<PageWrapper><GamesArea /></PageWrapper>} />
+              <Route path="games/career/:levelId" element={<PageWrapper><CareerLevelPage /></PageWrapper>} />
+              <Route path="games/dreamlife" element={<PageWrapper><DreamLifePlanner /></PageWrapper>} />
+              <Route path="games/stockmarket" element={<PageWrapper><StockMarketGame /></PageWrapper>} />
+              <Route path="tools" element={<PageWrapper><ToolsArea /></PageWrapper>} />
+              <Route path="articles" element={<PageWrapper><ArticlesArea /></PageWrapper>} />
+              <Route path="habit" element={<PageWrapper><HabitTracker /></PageWrapper>} />
+              <Route path="transactions" element={<PageWrapper><TransactionsArea /></PageWrapper>} />
+            </Route>
+          </Routes>
+        </AnimatePresence>
       </UserProvider>
     </ToastsProvider>
   );
