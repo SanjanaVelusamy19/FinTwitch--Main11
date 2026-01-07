@@ -1,331 +1,270 @@
 export const STORY_MODULES = {
     1: {
         id: 1,
-        title: "The Paycheck Paradox",
+        title: "Basics of Money",
+        passingScore: 70, // 70% to unlock activity
+        rewards: {
+            cash: 200,
+            xp: 100
+        },
+        progression: {
+            success: "Activity Zone unlocked + Level 2",
+            fail: "Reset Level 1"
+        },
         stages: [
             {
-                type: "story",
+                type: "slide", // New type for pure content slides
+                title: "Concept Overview — Understanding Money",
                 content: `
-# Welcome to the Real World!
-You just landed your first job as a Graphic Designer. Congratulations! 
-The offer letter says **₹40,000/month**. You feel rich! 
-            
-But then... *ding* 📱. Your first salary credit SMS arrives.
-It's **₹36,500**. (Taxes and PF, remember?)
-            
-Your friends are calling to celebrate tonight at a fancy club. Your landlord just texted about rent. 
-And that generic phone you have? It's looking really old compared to your colleague's Pro Max.
-            
-**Meaning:** Money flows out faster than it flows in. 
-This level is about mastering the *Flow*.
+**Money** is a medium of exchange that enables people to buy goods and services.
+
+**Understanding money includes:**
+*   How income is earned
+*   How money is spent
+*   Difference between needs vs wants
+*   Importance of tracking cash flow
+
+**📌 Learning Focus:**
+Building foundational financial awareness for everyday decisions.
+`
+            },
+            {
+                type: "slide",
+                title: "Scenario Reminder",
+                content: `
+**Asha** is a college student.
+
+*   **Monthly allowance:** ₹8,000
+*   **Expenses:** Food, travel, mobile recharge, entertainment
+*   **Goal:** Avoid running out of money before month-end
 `
             },
             {
                 type: "quiz",
-                question: "What is the '50-30-20' rule basically saying?",
+                question: "What Is Money? Which statement BEST describes money?",
                 options: [
-                    "50% Savings, 30% Needs, 20% Wants",
-                    "50% Needs, 30% Wants, 20% Savings",
-                    "50% Rent, 30% Food, 20% Party"
+                    "A tool only for rich people",
+                    "A medium to exchange goods and services",
+                    "A way to show social status",
+                    "Something used only for saving"
                 ],
                 answer: 1,
-                feedback: "Correct! Needs comes first (50%), then enjoy your Wants (30%), but NEVER forget to Pay Yourself (20% Savings)."
+                explanation: {
+                    correct: "Money allows buying and selling efficiently without barter.",
+                    wrong: "A: Everyone uses money. C: Social status is not its purpose. D: Money is also used for spending.",
+                    source: "https://www.khanacademy.org/economics-finance-domain/core-finance/money-and-banking"
+                },
+                skillImpact: { "Money Basics": 20 }
             },
+            {
+                type: "quiz",
+                question: "Which of the following is an INCOME source for Asha?",
+                options: [
+                    "Paying hostel rent",
+                    "Buying movie tickets",
+                    "Monthly allowance",
+                    "Mobile data recharge"
+                ],
+                answer: 2,
+                explanation: {
+                    correct: "Income is money received, not spent.",
+                    wrong: "All others are expenses (money flowing out).",
+                    source: "https://www.investopedia.com/terms/i/income.asp"
+                },
+                skillImpact: { "Income Awareness": 20 }
+            },
+            {
+                type: "quiz",
+                question: "Which expense is a NEED?",
+                options: [
+                    "Online shopping",
+                    "Restaurant food",
+                    "Daily transportation",
+                    "Movie subscription"
+                ],
+                answer: 2,
+                explanation: {
+                    correct: "Transportation is essential for daily activities.",
+                    wrong: "They are optional lifestyle expenses (Wants).",
+                    source: "https://www.consumerfinance.gov/consumer-tools/money-as-you-grow"
+                },
+                skillImpact: { "Spending Control": 20 }
+            },
+            {
+                type: "quiz",
+                question: "If Asha spends more than her income, what happens?",
+                options: [
+                    "Savings increase",
+                    "Money lasts longer",
+                    "Financial stress increases",
+                    "Income automatically grows"
+                ],
+                answer: 2,
+                explanation: {
+                    correct: "Overspending leads to shortages and stress.",
+                    wrong: "Savings decrease, money runs out, and income doesn't change just because you spend.",
+                    source: "https://www.nerdwallet.com/article/finance/what-is-cash-flow"
+                },
+                skillImpact: { "Money Basics": 10, "Spending Control": 10 }
+            },
+            {
+                type: "quiz",
+                question: "Which habit helps manage money better?",
+                options: [
+                    "Ignoring expenses",
+                    "Spending first, saving later",
+                    "Tracking income and expenses",
+                    "Borrowing regularly"
+                ],
+                answer: 2,
+                explanation: {
+                    correct: "Tracking helps control spending and plan better.",
+                    wrong: "Ignoring pushes problems away. Spending first leaves nothing. Borrowing creates debt.",
+                    source: "https://www.moneyhelper.org.uk/en/everyday-money/budgeting"
+                },
+                skillImpact: { "Spending Control": 20 }
+            },
+            // MIDDLE BARRIER - CHECK SCORE HERE in Logic
             {
                 type: "activity",
-                activityType: "budget_balancer",
-                title: "Balance Your Budget",
-                description: "Allocate your ₹36,500 salary to fit the 50/30/20 rule."
-            },
-            {
-                type: "decision",
-                scenario: "Your friends are planning a trip to Goa next month. It will cost ₹15,000 (almost 40% of your take-home). You have ₹5,000 in your bank account right now.",
-                options: [
-                    {
-                        text: "YOLO! Book it on Credit Card",
-                        consequence: "bad",
-                        feedback: "You enjoyed the trip, but now you have high-interest debt dragging you down for months. Not a smart start."
-                    },
-                    {
-                        text: "Say 'No' for now, save for the next one",
-                        consequence: "good",
-                        feedback: "Hard choice, but smart. You kept your financial peace and can plan a better, debt-free trip later."
-                    }
-                ]
+                activityType: "odd_one_out",
+                title: "Activity Zone — Odd One Out",
+                description: "Identify the 'Luxury watch' (Want) among the basic Needs.",
+                items: ["Grocery bill", "Bus ticket", "Mobile recharge", "Luxury watch"],
+                correctItem: "Luxury watch"
             }
         ]
     },
     2: {
         id: 2,
-        title: "The Rainy Day",
+        title: "Saving Habits",
+        passingScore: 70,
+        rewards: {
+            cash: 500,
+            xp: 150
+        },
+        progression: {
+            success: "Activity Zone + Level 3",
+            fail: "Reset Level 2"
+        },
         stages: [
             {
-                type: "story",
+                type: "slide",
+                title: "Concept Overview — Importance of Saving",
                 content: `
-# Life Happens...
-You are cruising along. Budget is okay. Life is good.
-            
-Suddenly, **CRASH!** 🚗
-Your bike skids on a wet road. You are fine, but the bike... not so much.
-The mechanic quotes **₹12,000** for repairs.
-            
-At the same time, your laptop charger dies (₹2,500).
-            
-Total unexpected expense: **₹14,500**.
-Do you have a cushion? Or will you fall flat on the concrete?
+**Saving money** means setting aside a portion of income for:
+*   Future needs
+*   Emergencies
+*   Goals
+
+Strong saving habits create financial security and discipline.
+
+**📌 Learning Focus:**
+Developing consistent and realistic saving behavior.
+`
+            },
+            {
+                type: "slide",
+                title: "Scenario Reminder",
+                content: `
+**Rohit** (Intern)
+*   **Income:** ₹15,000/month
+*   **Goal:** Buy a laptop worth ₹45,000 in 1 year
+*   **Current State:** Saves irregularly
 `
             },
             {
                 type: "quiz",
-                question: "What is an 'Emergency Fund'?",
+                question: "What does saving mean?",
                 options: [
-                    "Money kept hidden under the mattress",
-                    "3-6 months of expenses kept safe for crisis",
-                    "A fund to buy latest gadgets quickly"
+                    "Spending leftover money",
+                    "Keeping money aside for future",
+                    "Borrowing for emergencies",
+                    "Avoiding all expenses"
                 ],
                 answer: 1,
-                feedback: "Exactly. It's not for investing, it's for insurance against life's surprises."
-            },
-            {
-                type: "activity",
-                activityType: "emergency_builder",
-                title: "Fill the Emergency Pot",
-                description: "Tap to fill your emergency fund while avoiding 'Lifestyle Creep' obstacles."
-            },
-            {
-                type: "decision",
-                scenario: "You don't have enough saved for the bike repair yet. What do you do?",
-                options: [
-                    {
-                        text: "Take a Personal Loan @ 18%",
-                        consequence: "bad",
-                        feedback: "Ouch. Personal loans are expensive. You'll be paying for that skid for a long time."
-                    },
-                    {
-                        text: "Use bus/metro for a month & fix basics first",
-                        consequence: "good",
-                        feedback: "Resilient! You adapted your lifestyle to handle the crisis without debt."
-                    }
-                ]
-            }
-        ]
-    },
-    3: {
-        id: 3,
-        title: "The Debt Trap",
-        stages: [
-            {
-                type: "story",
-                content: `
-# Minimum Due, Maximum Pain
-You got a Credit Card! Limit: ₹1,00,000.
-It feels like free money. You bought a new console, some clothes, and treated your family.
-            
-Bill arrives: **₹40,000**.
-"Minimum Due": **₹2,000**.
-            
-You think: *'Wow, I only have to pay ₹2k? Sweet!'*
-            
-STOP. 🛑
-That is the trap. The 40% interest trap.
-`
+                explanation: {
+                    correct: "Saving is strictly regarding setting aside money for future use.",
+                    wrong: "Spending is opposite. Borrowing is debt. Avoiding expenses is frugality, not saving itself.",
+                    source: "https://www.investopedia.com/terms/s/savings.asp"
+                },
+                skillImpact: { "Saving Discipline": 15 }
             },
             {
                 type: "quiz",
-                question: "If you only pay the 'Minimum Due' on credit cards...",
+                question: "If Rohit saves 20% of ₹15,000, how much is that?",
                 options: [
-                    "The bank thanks you",
-                    "You pay huge interest on the balance",
-                    "Your credit score increases fast"
-                ],
-                answer: 1,
-                feedback: "Correct. Revolving credit debt is one of the worst financial products. Always pay in full."
-            },
-            {
-                type: "activity",
-                activityType: "debt_destroyer",
-                title: "Snowball vs Avalanche",
-                description: "Choose the best order to pay off these 3 debts to save maximum money."
-            },
-            {
-                type: "decision",
-                scenario: "A bank calls: 'Sir/Ma'am, you are eligible for a Pre-Approved Jumbo Loan of ₹5 Lakhs! No paperwork!'",
-                options: [
-                    {
-                        text: "Take it! I can invest it in stocks.",
-                        consequence: "bad",
-                        feedback: "Terrible idea. Loan interest (15%) > Guaranteed stock returns (0%). You are taking huge risk."
-                    },
-                    {
-                        text: "Block the number.",
-                        consequence: "good",
-                        feedback: "Peace of mind preserved. Unless you have a specific need, debt is not a casual accessory."
-                    }
-                ]
-            }
-        ]
-    },
-    4: {
-        id: 4,
-        title: "The Silent Killer",
-        stages: [
-            {
-                type: "story",
-                content: `
-# The Invisible Thief
-You have learnt to save. You have ₹2 Lakhs sitting in your Savings Account.
-You feel safe.
-            
-But wait.
-A Burger cost ₹50 five years ago. Now it's ₹100.
-Your ₹2 Lakhs staying in the bank (earning 3%) is actually **SHRINKING** because inflation is 6%.
-            
-This is the silent killer: **Inflation**.
-To beat it, you cannot just Save. You must **Invest**.
-`
-            },
-            {
-                type: "quiz",
-                question: "To beat 6% inflation, your investment must return:",
-                options: [
-                    "Exactly 6%",
-                    "Less than 6% is fine (safety first)",
-                    "More than 6% (post-tax)"
+                    "₹2,000",
+                    "₹2,500",
+                    "₹3,000",
+                    "₹4,000"
                 ],
                 answer: 2,
-                feedback: "Spot on. Real Return = Return - Inflation. If it's negative, you are losing purchasing power."
-            },
-            {
-                type: "activity",
-                activityType: "inflation_visualizer",
-                title: "Time Travel Shopper",
-                description: "Drag the year slider to see how much a basket of goods costs over time."
-            },
-            {
-                type: "decision",
-                scenario: "Your uncle suggests: 'Put all money in Fixed Deposits (FDs). It's safe.' FDs are giving 6% returns. Inflation is 6%.",
-                options: [
-                    {
-                        text: "Listen to Uncle (100% FD)",
-                        consequence: "bad",
-                        feedback: "You preserved capital but lost value. In 10 years, that money buys less than today."
-                    },
-                    {
-                        text: "Diversify (FD + Equity/Gold)",
-                        consequence: "good",
-                        feedback: "Smart. Equity gives growth to beat inflation; FDs give stability."
-                    }
-                ]
-            }
-        ]
-    },
-    5: {
-        id: 5,
-        title: "The Magic of Compounding",
-        stages: [
-            {
-                type: "story",
-                content: `
-# The Eighth Wonder
-You start a SIP (Systematic Investment Plan) of ₹5,000/month.
-After 1 year, you have ~₹63,000.
-After 5 years, ~₹4 Lakhs.
-            
-Boring right?
-            
-But wait... do nothing different. Just keep going.
-After 20 years? **~₹50 Lakhs**.
-After 30 years? **~₹1.7 Crores**.
-            
-Your money starts making money for you. That is **Compounding**.
-But it needs one ingredient: **TIME**.
-`
+                explanation: {
+                    correct: "20% of 15,000 = (20/100) * 15000 = ₹3,000.",
+                    wrong: "Math check: 2000 is 13%, 4000 is 26%.",
+                    source: null
+                },
+                skillImpact: { "Financial Planning": 20 }
             },
             {
                 type: "quiz",
-                question: "When is the best time to start investing?",
+                question: "Why is an emergency fund important?",
                 options: [
-                    "When I earn more money",
-                    "Yesterday (or Today!)",
-                    "When the market crashes"
+                    "For shopping",
+                    "For vacations",
+                    "For unexpected expenses",
+                    "For investments"
                 ],
-                answer: 1,
-                feedback: "Time in the market beats timing the market. Start small, but start NOW."
-            },
-            {
-                type: "activity",
-                activityType: "compounding_curve",
-                title: "Grow Your Tree",
-                description: "Water your money tree regularly and watch the exponential growth."
-            },
-            {
-                type: "decision",
-                scenario: "The market crashes 20% due to global news! Your portfolio shows red (-₹50,000).",
-                options: [
-                    {
-                        text: "Panic Sell! Save what's left!",
-                        consequence: "bad",
-                        feedback: "You just made a temporary loss permanent. Buy low, sell high... remember?"
-                    },
-                    {
-                        text: "Stay Calm & Continue SIP",
-                        consequence: "good",
-                        feedback: "Champion mindset! You are buying more units at lower prices. This will pay off huge later."
-                    }
-                ]
-            }
-        ]
-    },
-    6: {
-        id: 6,
-        title: "The Freedom Goal",
-        stages: [
-            {
-                type: "story",
-                content: `
-# Is this it?
-Work, Earn, Spend. Work, Earn, Spend.
-            
-Is that the loop for the next 40 years?
-            
-Level 6 is about **F.I.R.E.** (Financial Independence, Retire Early).
-It's not about not working. It's about working because you *want* to, not because you *have* to.
-            
-When your investments pay for your lifestyle, you are Free.
-`
+                answer: 2,
+                explanation: {
+                    correct: "It balances shocks from unexpected events.",
+                    wrong: "Shopping/Vacations are goals. Investments are for growth.",
+                    source: "https://www.nerdwallet.com/article/finance/emergency-fund"
+                },
+                skillImpact: { "Saving Discipline": 15, "Financial Planning": 10 }
             },
             {
                 type: "quiz",
-                question: "What is the 'corpus' requirement for Financial Independence (Rule of 25)?",
+                question: "Which habit encourages saving?",
                 options: [
-                    "10x Annual Expenses",
-                    "25x Annual Expenses",
-                    "₹10 Crores (Fixed)"
+                    "Saving only when extra money remains",
+                    "Saving first, spending later",
+                    "Ignoring goals",
+                    "Using credit for savings"
                 ],
                 answer: 1,
-                feedback: "A common thumb rule. If you spend ₹10L/year, you need ₹2.5 Crores invested properly."
+                explanation: {
+                    correct: "Pay yourself first ensures saving happens before spending.",
+                    wrong: "Saving leftovers usually means saving nothing.",
+                    source: "https://www.khanacademy.org/college-careers-more/financial-literacy"
+                },
+                skillImpact: { "Saving Discipline": 20 }
+            },
+            {
+                type: "quiz",
+                question: "How much will Rohit save in one year at ₹3,000/month?",
+                options: [
+                    "₹30,000",
+                    "₹36,000",
+                    "₹45,000",
+                    "₹50,000"
+                ],
+                answer: 1,
+                explanation: {
+                    correct: "₹3,000 × 12 months = ₹36,000.",
+                    wrong: "Math check.",
+                    source: null
+                },
+                skillImpact: { "Goal Awareness": 20, "Financial Planning": 10 }
             },
             {
                 type: "activity",
-                activityType: "freedom_calculator",
-                title: "Design Your Dream Life",
-                description: "Select your lifestyle goals and see when you can achieve Financial Freedom."
-            },
-            {
-                type: "decision",
-                scenario: "You got a big bonus! You can upgrade to a luxury car (higher EMI) or put it in your Freedom Fund.",
-                options: [
-                    {
-                        text: "Buy the Car (Life is short)",
-                        consequence: "bad",
-                        feedback: "Instant gratification is the enemy of freedom. You just added 3 more working years to your life."
-                    },
-                    {
-                        text: "Invest for Freedom",
-                        consequence: "good",
-                        feedback: "You just bought your future self time and freedom. That is the ultimate luxury."
-                    }
-                ]
+                activityType: "odd_one_out",
+                title: "Activity Zone — Odd One Out",
+                description: "Identify the item that doesn't belong in a Savings Plan context: 'Shopping Cart'.",
+                items: ["Piggy bank", "Bank savings account", "Emergency fund jar", "Shopping cart"],
+                correctItem: "Shopping cart"
             }
         ]
     }

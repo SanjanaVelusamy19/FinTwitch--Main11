@@ -128,8 +128,54 @@ export const InflationVisualizer = ({ onComplete }) => {
     );
 };
 
+// --- Generic Activity: Odd One Out ---
+export const OddOneOut = ({ items, correctItem, onComplete }) => {
+    const [selected, setSelected] = useState(null);
+    const [feedback, setFeedback] = useState(null);
+
+    const handleSelect = (item) => {
+        setSelected(item);
+        if (item === correctItem) {
+            setFeedback({ correct: true, text: "Correct! That is the odd one out." });
+            setTimeout(() => onComplete(true), 1500);
+        } else {
+            setFeedback({ correct: false, text: "Not quite. Try again." });
+        }
+    };
+
+    return (
+        <div className="p-6 bg-slate-800/50 rounded-xl border border-slate-700 text-center">
+            <h3 className="text-xl font-bold text-white mb-6">Find the 'Odd One Out'</h3>
+
+            <div className="grid grid-cols-2 gap-4 mb-6">
+                {items && items.map((item, idx) => (
+                    <button
+                        key={idx}
+                        onClick={() => handleSelect(item)}
+                        className={`p-6 rounded-xl border transition-all font-bold text-sm md:text-base ${selected === item
+                                ? feedback?.correct
+                                    ? "bg-emerald-500/20 border-emerald-500 text-emerald-200"
+                                    : "bg-red-500/20 border-red-500 text-red-200"
+                                : "bg-slate-700 hover:bg-slate-600 border-transparent text-slate-200"
+                            }`}
+                    >
+                        {item}
+                    </button>
+                ))}
+            </div>
+
+            {feedback && (
+                <div className={`text-sm font-bold animate-in fade-in ${feedback.correct ? "text-emerald-400" : "text-amber-400"}`}>
+                    {feedback.text}
+                </div>
+            )}
+        </div>
+    );
+};
+
+
 // --- Simple Factory for Activities ---
-export default function ModuleActivity({ type, onComplete }) {
+export default function ModuleActivity({ type, items, correctItem, onComplete }) {
     switch (type) {
         case 'budget_balancer':
             return <BudgetBalancer onComplete={onComplete} />;
@@ -137,7 +183,10 @@ export default function ModuleActivity({ type, onComplete }) {
             return <EmergencyBuilder onComplete={onComplete} />;
         case 'inflation_visualizer':
             return <InflationVisualizer onComplete={onComplete} />;
-        case 'debt_destroyer': // Reusing simple completion for now
+        case 'odd_one_out':
+        case 'odd_one_out_savings':
+            return <OddOneOut items={items} correctItem={correctItem} onComplete={onComplete} />;
+        case 'debt_destroyer':
         case 'compounding_curve':
         case 'freedom_calculator':
             return (
